@@ -31,6 +31,11 @@ public class MainMenuHomeScene : MonoBehaviour {
 		WorldsChoose.SetActive (false);
 		LevelsChoose.SetActive (true);
 
+		if (WorldLevel == null || WorldLevel.Length < world) {
+			Debug.LogError("WorldLevel array is not assigned or does not have enough elements for world " + world);
+			return;
+		}
+
 		for (int i = 0; i < WorldLevel.Length; i++) {
 			if (i == (world - 1)) {
 				WorldLevel [i].SetActive (true);
