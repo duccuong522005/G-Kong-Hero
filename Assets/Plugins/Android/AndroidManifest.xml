@@ -18,6 +18,7 @@
     <activity android:name="com.facebook.unity.FBUnityJoinGameGroupActivity" />
     <activity android:name="com.facebook.unity.AppInviteDialogActivity" />
     <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="fb377000519090495" />
+    <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-2103765367944686~7512017564" />
     <provider android:name="com.facebook.FacebookContentProvider" android:authorities="com.facebook.app.FacebookContentProvider377000519090495" android:exported="true" />
   </application>
 </manifest>

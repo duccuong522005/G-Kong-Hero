@@ -17,18 +17,13 @@ public class ServiceManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-//		if (gameObject.transform.childCount == 0) {
-//			Debug.LogError ("There are no any service object, please read the Tutorial file to setup the service");
-//			return;
-//		}
+		if (AdMobManager.Instance == null) {
+			// Ensure AdMobManager is present in the scene, so reward flow works
+			gameObject.AddComponent<AdMobManager>();
+		}
 
-//		if (GameObject.Find ("AdsController") != null)
-			_AdsController = GameObject.Find ("AdsController");
-//		if (GameObject.Find ("UnityAds") != null)
-			_UnityAds = GameObject.Find ("UnityAds");
-//		
-//		
-////		_IAP = transform.Find ("IAP").gameObject;
+		_AdsController = GameObject.Find ("AdsController");
+		_UnityAds = GameObject.Find ("UnityAds");
 		_Facebook = GameObject.Find ("Facebook");
 
 	}
@@ -50,10 +45,10 @@ public class ServiceManager : MonoBehaviour {
 	}
 
 	public void ShowRewardAds(){
-		if (_UnityAds != null)
-			_UnityAds.SendMessage ("ShowRewardVideo");
+		if (AdMobManager.Instance != null)
+			AdMobManager.Instance.ShowRewardedAd();
 		else
-			Debug.Log ("There is no UnityAds object in the scene, please read the Tutorial file for more information");
+			Debug.Log ("AdMobManager not found");
 	}
 
 //	public void BuyItem1(){
