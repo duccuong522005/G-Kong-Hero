@@ -9,6 +9,7 @@ public class MainMenuHomeScene : MonoBehaviour {
 	public GameObject LoadingScreen;
 	public GameObject LevelsChoose;
 	public GameObject CharacterChoose;
+	public GameObject AchievementPanel;
 	public GameObject[] WorldLevel;
 
 	SoundManager soundManager;
@@ -66,7 +67,33 @@ public class MainMenuHomeScene : MonoBehaviour {
 		StartMenu.SetActive (false);
 		CharacterChoose.SetActive (true);
 
+		SoundManager.PlaySfx (soundManager.soundClick);
+	}
 
+	public void OpenAchievement(){
+		// Nếu đang mở world/character hay loading thì tắt hết
+		StartMenu.SetActive (false);
+		WorldsChoose.SetActive (false);
+		LevelsChoose.SetActive (false);
+		CharacterChoose.SetActive (false);
+
+		if (AchievementPanel != null)
+			AchievementPanel.SetActive (true);
+
+		// Reload achievement state từ PlayerPrefs khi mở panel
+		if (AchievementManager.Instance != null) {
+			AchievementManager.Instance.LoadAchievementState();
+			AchievementManager.Instance.RefreshUI();
+		}
+
+		SoundManager.PlaySfx (soundManager.soundClick);
+	}
+
+	public void CloseAchievement(){
+		if (AchievementPanel != null)
+			AchievementPanel.SetActive (false);
+
+		OpenStartMenu();
 		SoundManager.PlaySfx (soundManager.soundClick);
 	}
 }

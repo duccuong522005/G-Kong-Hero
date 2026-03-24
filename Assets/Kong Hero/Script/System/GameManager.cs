@@ -139,6 +139,23 @@ public class GameManager: MonoBehaviour {
 		SavedPoints = Point;
 		SavedBullets = Bullet;
 
+		// Completed level => update achievement state
+		if (AchievementManager.Instance != null) {
+			Debug.Log("GameFinish - World: " + GlobalValue.worldPlaying + ", Level: " + GlobalValue.levelPlaying + ", isLastLevel: " + LevelManager.Instance.isLastLevelOfWorld);
+			
+			// Achievement 1: Hoàn thành Level 2 của Map 1
+			if (GlobalValue.worldPlaying == 1 && GlobalValue.levelPlaying == 2) {
+				Debug.Log("TRIGGERING Achievement 1 (Level 2)");
+				AchievementManager.Instance.CompleteAchievement("1");
+			}
+			
+			// Achievement 2: Hoàn thành toàn bộ level của Map 1
+			if (GlobalValue.worldPlaying == 1 && LevelManager.Instance.isLastLevelOfWorld) {
+				Debug.Log("TRIGGERING Achievement 2 (Last Level)");
+				AchievementManager.Instance.CompleteAchievement("2");
+			}
+		}
+
 		//unlock new world if this level is the last one
 		if (LevelManager.Instance.isLastLevelOfWorld) {
 			PlayerPrefs.SetInt (GlobalValue.WorldReached, GlobalValue.worldPlaying + 1);
