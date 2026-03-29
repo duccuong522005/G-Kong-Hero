@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 63dc96a73ad7c5c42b3a94be5a315f14
+guid: 0e6c863c7939555448b3c5f82ee98c95
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3611916972737831444
-    second: achievement-Photoroom_0
+      213: -8295733719565940825
+    second: leader board_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: achievement-Photoroom_0
+      name: leader board_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4122e36995b102230800000000000000
-      internalID: 3611916972737831444
+      spriteID: 7a7ca0e7222afdc80800000000000000
+      internalID: -8295733719565940825
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      achievement-Photoroom_0: 3611916972737831444
+      leader board_0: -8295733719565940825
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

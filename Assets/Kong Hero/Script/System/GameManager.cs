@@ -78,6 +78,12 @@ public class GameManager: MonoBehaviour {
 	}
 
 
+	public int SavedMaxLevel{ 
+		get { return PlayerPrefs.GetInt ("MaxLevel", 0); } 
+		set { PlayerPrefs.SetInt ("MaxLevel", value); } 
+	}
+
+
 	void Start(){
 		menuManager = FindObjectOfType<MenuManager> ();
 
@@ -86,6 +92,12 @@ public class GameManager: MonoBehaviour {
 		Coin = SavedCoins;
 		Bullet = SavedBullets;
 		Point = SavedPoints;
+
+		// Cập nhật leaderboard với level cao nhất đã đạt khi vào game
+		if (LeaderboardManager.Instance != null && SavedMaxLevel > 0) {
+			LeaderboardManager.Instance.UpdatePlayerScore(SavedMaxLevel);
+			LeaderboardManager.Instance.RefreshUI();
+		}
 	}
 
 
@@ -140,19 +152,52 @@ public class GameManager: MonoBehaviour {
 		SavedBullets = Bullet;
 
 		// Completed level => update achievement state
-		if (AchievementManager.Instance != null) {
-			Debug.Log("GameFinish - World: " + GlobalValue.worldPlaying + ", Level: " + GlobalValue.levelPlaying + ", isLastLevel: " + LevelManager.Instance.isLastLevelOfWorld);
-			
-			// Achievement 1: Hoàn thành Level 2 của Map 1
-			if (GlobalValue.worldPlaying == 1 && GlobalValue.levelPlaying == 2) {
-				Debug.Log("TRIGGERING Achievement 1 (Level 2)");
+		Debug.Log("GameFinish - World: " + GlobalValue.worldPlaying + ", Level: " + GlobalValue.levelPlaying + ", isLastLevel: " + LevelManager.Instance.isLastLevelOfWorld);
+
+		// Achievement 1: Hoàn thành Level 2 của Map 1
+		if (GlobalValue.worldPlaying == 1 && GlobalValue.levelPlaying == 2) {
+			Debug.Log("TRIGGERING Achievement 1 (Level 2)");
+			if (AchievementManager.Instance != null) {
 				AchievementManager.Instance.CompleteAchievement("1");
+			} else {
+				PlayerPrefs.SetInt("1_completed", 1);
+				PlayerPrefs.SetInt("1_claimed", 0);
+				PlayerPrefs.Save();
 			}
-			
-			// Achievement 2: Hoàn thành toàn bộ level của Map 1
-			if (GlobalValue.worldPlaying == 1 && LevelManager.Instance.isLastLevelOfWorld) {
-				Debug.Log("TRIGGERING Achievement 2 (Last Level)");
+		}
+
+		// Achievement 2: Hoàn thành toàn bộ Map 1 (level 4 của world 1, là last level)
+		if (GlobalValue.worldPlaying == 1 && GlobalValue.levelPlaying == 4 && LevelManager.Instance.isLastLevelOfWorld) {
+			Debug.Log("TRIGGERING Achievement 2 (World 1 completion)");
+			if (AchievementManager.Instance != null) {
 				AchievementManager.Instance.CompleteAchievement("2");
+			} else {
+				PlayerPrefs.SetInt("2_completed", 1);
+				PlayerPrefs.SetInt("2_claimed", 0);
+				PlayerPrefs.Save();
+			}
+		}
+
+		// Cập nhật leaderboard offline khi hoàn thành level, tính level toàn cục 1..8
+		int globalLevel = LeaderboardManager.Instance != null
+			? LeaderboardManager.Instance.GetGlobalLevel(GlobalValue.worldPlaying, GlobalValue.levelPlaying)
+			: (GlobalValue.worldPlaying - 1) * 4 + GlobalValue.levelPlaying;
+
+		if (globalLevel > SavedMaxLevel) {
+			SavedMaxLevel = globalLevel;
+		}
+
+		if (LeaderboardManager.Instance != null) {
+			LeaderboardManager.Instance.UpdatePlayerScore(globalLevel);
+			LeaderboardManager.Instance.RefreshUI();
+			Debug.Log($"Leaderboard updated in-instance: globalLevel={globalLevel}, SavedMaxLevel={SavedMaxLevel}");
+		} else {
+			// Không có LeaderboardManager trong level scene, lưu tạm để menu lấy về
+			int pending = PlayerPrefs.GetInt("Leaderboard_Pending_You_Level", 0);
+			if (globalLevel > pending) {
+				PlayerPrefs.SetInt("Leaderboard_Pending_You_Level", globalLevel);
+				PlayerPrefs.Save();
+				Debug.Log($"Leaderboard pending saved: globalLevel={globalLevel}");
 			}
 		}
 

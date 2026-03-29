@@ -27,11 +27,21 @@ public class AchievementManager : MonoBehaviour {
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        // Không giữ object qua scene vì các tham chiếu UI trong menu sẽ mất khi sang scene khác.
+        // Manager chỉ cần tồn tại trong menu, lưu/trích dữ liệu bằng PlayerPrefs.
     }
 
     void Start() {
         LoadAchievementState();
+        RefreshUI();
+    }
+
+    public void ResetAllAchievements() {
+        foreach (var item in achievements) {
+            item.isCompleted = false;
+            item.isClaimed = false;
+        }
+        SaveAchievementState();
         RefreshUI();
     }
 
@@ -90,6 +100,8 @@ public class AchievementManager : MonoBehaviour {
         if (item == null) { Debug.LogWarning("Achievement not found: " + id); return; }
         if (!item.isCompleted) {
             item.isCompleted = true;
+            item.isClaimed = false; // Mở khóa mới, chưa claim
+            Debug.Log("Achievement unlocked: " + id + " - " + item.title);
             SaveAchievementState();
             RefreshUI();
         }
@@ -101,9 +113,13 @@ public class AchievementManager : MonoBehaviour {
         if (item.isCompleted && !item.isClaimed) {
             item.isClaimed = true;
             GlobalValue.SavedCoins += item.rewardAmount;
-            Debug.Log("Achievement claimed: " + item.title + " reward=" + item.rewardAmount + " coins.");
+            Debug.Log("Achievement claimed: " + item.title + " reward=" + item.rewardAmount + " coins. Total Coins=" + GlobalValue.SavedCoins);
             SaveAchievementState();
             RefreshUI();
+        } else if (!item.isCompleted) {
+            Debug.LogWarning("Achievement not completed yet: " + id);
+        } else {
+            Debug.LogWarning("Achievement already claimed: " + id);
         }
     }
 
@@ -117,9 +133,26 @@ public class AchievementManager : MonoBehaviour {
     }
 
     public void LoadAchievementState() {
+        // Nếu chưa có key, reset tất cả về locked để tránh trạng thái pre-unlocked do inspector để nhầm true
+        bool hasAny = false;
         foreach (var item in achievements) {
-            item.isCompleted = PlayerPrefs.GetInt(item.id + "_completed", item.isCompleted ? 1 : 0) == 1;
-            item.isClaimed = PlayerPrefs.GetInt(item.id + "_claimed", item.isClaimed ? 1 : 0) == 1;
+            if (PlayerPrefs.HasKey(item.id + "_completed") || PlayerPrefs.HasKey(item.id + "_claimed")) {
+                hasAny = true;
+                break;
+            }
+        }
+
+        if (!hasAny) {
+            foreach (var item in achievements) {
+                item.isCompleted = false;
+                item.isClaimed = false;
+            }
+            return;
+        }
+
+        foreach (var item in achievements) {
+            item.isCompleted = PlayerPrefs.GetInt(item.id + "_completed", 0) == 1;
+            item.isClaimed = PlayerPrefs.GetInt(item.id + "_claimed", 0) == 1;
         }
     }
 

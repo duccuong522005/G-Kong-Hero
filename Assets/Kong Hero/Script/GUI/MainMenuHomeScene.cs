@@ -10,6 +10,7 @@ public class MainMenuHomeScene : MonoBehaviour {
 	public GameObject LevelsChoose;
 	public GameObject CharacterChoose;
 	public GameObject AchievementPanel;
+	public GameObject LeaderboardPanel;
 	public GameObject[] WorldLevel;
 
 	SoundManager soundManager;
@@ -76,6 +77,7 @@ public class MainMenuHomeScene : MonoBehaviour {
 		WorldsChoose.SetActive (false);
 		LevelsChoose.SetActive (false);
 		CharacterChoose.SetActive (false);
+		LeaderboardPanel?.SetActive(false);
 
 		if (AchievementPanel != null)
 			AchievementPanel.SetActive (true);
@@ -92,6 +94,33 @@ public class MainMenuHomeScene : MonoBehaviour {
 	public void CloseAchievement(){
 		if (AchievementPanel != null)
 			AchievementPanel.SetActive (false);
+
+		OpenStartMenu();
+		SoundManager.PlaySfx (soundManager.soundClick);
+	}
+
+	public void OpenLeaderboard(){
+		StartMenu.SetActive (false);
+		WorldsChoose.SetActive (false);
+		LevelsChoose.SetActive (false);
+		CharacterChoose.SetActive (false);
+		AchievementPanel?.SetActive(false);
+
+		if (LeaderboardPanel != null)
+			LeaderboardPanel.SetActive(true);
+
+		if (LeaderboardManager.Instance != null) {
+			LeaderboardManager.Instance.ApplyPendingPlayerScore();
+			LeaderboardManager.Instance.LoadLeaderboard();
+			LeaderboardManager.Instance.RefreshUI();
+		}
+
+		SoundManager.PlaySfx (soundManager.soundClick);
+	}
+
+	public void CloseLeaderboard(){
+		if (LeaderboardPanel != null)
+			LeaderboardPanel.SetActive(false);
 
 		OpenStartMenu();
 		SoundManager.PlaySfx (soundManager.soundClick);
