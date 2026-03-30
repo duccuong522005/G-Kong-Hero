@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class BirdAI : EnemyAI {
@@ -17,9 +17,12 @@ public class BirdAI : EnemyAI {
 
 	public override void LateUpdate ()
 	{
-		if (!isChasing || !isPlaying)
+		if (!isChasing || !isPlaying) {
 			base.LateUpdate ();
-		else if (isPlaying) {
+			return;
+		}
+
+		if (isPlaying && GameManager.Instance != null && GameManager.Instance.Player != null) {
 			if (Mathf.Abs (Vector3.Distance (transform.position, GameManager.Instance.Player.transform.position)) > finishDistance) {
 				transform.position = Vector3.MoveTowards (transform.position, GameManager.Instance.Player.transform.position + new Vector3(0,offsetPlayerY,0), chaseSpeed * Time.deltaTime);
 				_directionFace = transform.position.x > GameManager.Instance.Player.transform.position.x ? 1 : -1;
@@ -31,18 +34,21 @@ public class BirdAI : EnemyAI {
 	protected override void HitEvent ()
 	{
 		base.HitEvent ();
-		if (isDead)
+		if (isDead) {
 			Dead ();
+		}
 		
-		if (animator != null && hitEventName.CompareTo ("n/a") != 0)
+		if (animator != null && hitEventName.CompareTo ("n/a") != 0) {
 			animator.SetTrigger (hitEventName);
+		}
 
 	}
 
 	protected override void Dead ()
 	{
-		if (animator != null && deadEventName.CompareTo ("n/a") != 0)
+		if (animator != null && deadEventName.CompareTo ("n/a") != 0) {
 			animator.SetTrigger (deadEventName);
+		}
 
 		base.Dead ();
 
