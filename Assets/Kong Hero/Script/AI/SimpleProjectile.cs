@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class SimpleProjectile : Projectile, ICanTakeDamage
@@ -28,8 +28,9 @@ public class SimpleProjectile : Projectile, ICanTakeDamage
 	}
 
 	void DestroyProjectile(){
-		if (DestroyEffect != null)
+		if (DestroyEffect != null) {
 			Instantiate (DestroyEffect, transform.position, Quaternion.identity);
+		}
 		
 		Destroy (gameObject);
 	}
@@ -39,7 +40,7 @@ public class SimpleProjectile : Projectile, ICanTakeDamage
 	{
 		if (pointToGivePlayer != 0) {
 			var projectile = instigator.GetComponent<Projectile> ();
-			if (projectile != null && projectile.Owner.GetComponent<Player> () != null) {
+			if (projectile != null && projectile.Owner != null && projectile.Owner.GetComponent<Player> () != null) {
 				GameManager.Instance.AddPoint (pointToGivePlayer);
 				GameManager.Instance.ShowFloatingText ("+" + pointToGivePlayer, transform.position,Color.yellow);
 			}
