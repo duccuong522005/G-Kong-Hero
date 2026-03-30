@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class FireBallAI : MonoBehaviour,ICanTakeDamage, IPlayerRespawnListener {
@@ -13,27 +13,30 @@ public class FireBallAI : MonoBehaviour,ICanTakeDamage, IPlayerRespawnListener {
 	
 	// Update is called once per frame
 	void Update () {
-		var Y = transform.position.y;
+		var currentY = transform.position.y;
 
-		if (Y > oldY)
+		if (currentY > oldY) {
 			transform.localScale = new Vector3 (1, 1, 1);
-		else
+		} else {
 			transform.localScale = new Vector3 (1, -1, 1);
+		}
 
-		oldY = Y;
+		oldY = currentY;
 	}
 
 	#region ICanTakeDamage implementation
 
 	public void TakeDamage (float damage, Vector2 force, GameObject instigator)
 	{
-		if (!isKillByProjectile)
+		if (!isKillByProjectile || instigator == null) {
 			return;
+		}
 		
 		var projectile =(Projectile) instigator.GetComponent (typeof(Projectile));
 
-		if (projectile != null)
+		if (projectile != null) {
 			gameObject.SetActive (false);
+		}
 	}
 
 	#endregion
