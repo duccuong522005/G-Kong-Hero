@@ -1,22 +1,20 @@
+using System.IO;
 using UnityEngine;
-using System.Collections;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using System.IO;
 
 public class MainMenu_Level : MonoBehaviour {
+	private const string DefaultScenePlaceholder = "Level Name";
+
 	public int worldNumber = 0;
 	public int levelNumber = 0;
 
-
-
-	public string loadscene = "Level Name";
+	public string loadscene = DefaultScenePlaceholder;
 
 	public Text TextLevel;
 	public GameObject Locked;
 	private Button levelButton;
 
-	// Use this for initialization
 	void Start () {
 		levelButton = GetComponent<Button> ();
 		var levelReached = PlayerPrefs.GetInt (worldNumber.ToString (), 1);
@@ -43,7 +41,7 @@ public class MainMenu_Level : MonoBehaviour {
 
 		if (buildIndex >= 0) {
 			operation = SceneManager.LoadSceneAsync(buildIndex);
-		} else if (!string.IsNullOrWhiteSpace(loadscene) && loadscene != "Level Name") {
+		} else if (!string.IsNullOrWhiteSpace(loadscene) && loadscene != DefaultScenePlaceholder) {
 			operation = SceneManager.LoadSceneAsync(loadscene);
 		}
 
@@ -54,7 +52,6 @@ public class MainMenu_Level : MonoBehaviour {
 	}
 
 	int ResolveBuildIndex(){
-		// Preferred candidate based on button world / level.
 		string candidateByNumber = "World " + worldNumber + "-" + levelNumber;
 
 		for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
@@ -62,7 +59,7 @@ public class MainMenu_Level : MonoBehaviour {
 			string sceneName = Path.GetFileNameWithoutExtension(scenePath);
 
 			if (!string.IsNullOrWhiteSpace(loadscene) &&
-				loadscene != "Level Name" &&
+				loadscene != DefaultScenePlaceholder &&
 				string.Equals(sceneName, loadscene, System.StringComparison.OrdinalIgnoreCase)) {
 				return i;
 			}
