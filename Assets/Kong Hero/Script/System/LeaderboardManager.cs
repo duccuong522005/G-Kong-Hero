@@ -30,6 +30,8 @@ public class LeaderboardManager : MonoBehaviour
     private const string KEY_NAME = "Leaderboard_Name_";
     private const string KEY_LEVEL = "Leaderboard_Level_";
     private const string KEY_PENDING_SCORE = "Leaderboard_Pending_You_Level";
+    /// <summary>Persisted entry count; bounded so a corrupt PlayerPrefs value cannot freeze the main thread.</summary>
+    private const int MaxPersistedLeaderboardEntries = 64;
 
     void Awake()
     {
@@ -167,6 +169,18 @@ public class LeaderboardManager : MonoBehaviour
         allEntries.Clear();
 
         int storedCount = PlayerPrefs.GetInt(KEY_COUNT, 0);
+        if (storedCount < 0 || storedCount > MaxPersistedLeaderboardEntries)
+        {
+            Debug.LogWarning("Leaderboard: invalid stored count " + storedCount + "; resetting saved leaderboard.");
+            PlayerPrefs.DeleteKey(KEY_COUNT);
+            for (int i = 0; i < MaxPersistedLeaderboardEntries; i++)
+            {
+                PlayerPrefs.DeleteKey(KEY_NAME + i);
+                PlayerPrefs.DeleteKey(KEY_LEVEL + i);
+            }
+            PlayerPrefs.Save();
+            storedCount = 0;
+        }
         if (storedCount > 0)
         {
             for (int i = 0; i < storedCount; i++)
@@ -197,11 +211,17 @@ public class LeaderboardManager : MonoBehaviour
 
     public void SaveLeaderboard()
     {
-        PlayerPrefs.SetInt(KEY_COUNT, allEntries.Count);
-        for (int i = 0; i < allEntries.Count; i++)
+        int count = Mathf.Min(allEntries.Count, MaxPersistedLeaderboardEntries);
+        PlayerPrefs.SetInt(KEY_COUNT, count);
+        for (int i = 0; i < count; i++)
         {
             PlayerPrefs.SetString(KEY_NAME + i, allEntries[i].playerName);
             PlayerPrefs.SetInt(KEY_LEVEL + i, allEntries[i].levelsCompleted);
+        }
+        for (int i = count; i < MaxPersistedLeaderboardEntries; i++)
+        {
+            PlayerPrefs.DeleteKey(KEY_NAME + i);
+            PlayerPrefs.DeleteKey(KEY_LEVEL + i);
         }
         PlayerPrefs.Save();
     }
@@ -225,11 +245,9 @@ public class LeaderboardManager : MonoBehaviour
     {
         // Sắp xếp lại chắc chắn
         allEntries.Sort((a, b) => b.levelsCompleted.CompareTo(a.levelsCompleted));
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log("Leaderboard RefreshUI: count=" + allEntries.Count);
-        for (int i = 0; i < allEntries.Count; i++)
-        {
-            Debug.Log("Entry " + i + ": " + allEntries[i].playerName + ", " + allEntries[i].levelsCompleted);
-        }
+#endif
 
         for (int i = 0; i < 3; i++)
         {
