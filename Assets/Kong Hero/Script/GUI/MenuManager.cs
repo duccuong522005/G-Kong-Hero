@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -20,7 +20,7 @@ public class MenuManager : MonoBehaviour {
 		Gameover.SetActive (false);
 		GameFinish.SetActive (false);
 		GamePause.SetActive (false);
-		LoadingScreen.SetActive (true);
+		LoadingScreen.SetActive (false);
 	}
 
 	// Use this for initialization

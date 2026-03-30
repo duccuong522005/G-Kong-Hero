@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class MainMenuHomeScene : MonoBehaviour {
@@ -25,7 +25,7 @@ public class MainMenuHomeScene : MonoBehaviour {
 		StartMenu.SetActive (true);
 		WorldsChoose.SetActive (false);
 		LevelsChoose.SetActive (false);
-		LoadingScreen.SetActive (true);
+		LoadingScreen.SetActive (false);
 		CharacterChoose.SetActive (false);
 	}
 	
