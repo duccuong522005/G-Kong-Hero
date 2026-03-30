@@ -1,7 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class GameManager: MonoBehaviour {
+	private const string MaxLevelKey = "MaxLevel";
+	private const string Achievement1Id = "1";
+	private const string Achievement2Id = "2";
+	private const string LeaderboardPendingKey = "Leaderboard_Pending_You_Level";
+
 	public static GameManager Instance{ get; private set;}
 
 	public enum GameState{Menu,Playing, Dead, Finish};
@@ -79,8 +84,8 @@ public class GameManager: MonoBehaviour {
 
 
 	public int SavedMaxLevel{ 
-		get { return PlayerPrefs.GetInt ("MaxLevel", 0); } 
-		set { PlayerPrefs.SetInt ("MaxLevel", value); } 
+		get { return PlayerPrefs.GetInt (MaxLevelKey, 0); } 
+		set { PlayerPrefs.SetInt (MaxLevelKey, value); } 
 	}
 
 
@@ -136,8 +141,9 @@ public class GameManager: MonoBehaviour {
 		State = GameState.Playing;
 		LevelManager.Instance.StartGame ();
 
-		if (ServiceManager.Instance != null)
+		if (ServiceManager.Instance != null) {
 			ServiceManager.Instance.HideAds ();
+		}
 	}
 
 	public void GameFinish(){
@@ -157,25 +163,13 @@ public class GameManager: MonoBehaviour {
 		// Achievement 1: Hoàn thành Level 2 của Map 1
 		if (GlobalValue.worldPlaying == 1 && GlobalValue.levelPlaying == 2) {
 			Debug.Log("TRIGGERING Achievement 1 (Level 2)");
-			if (AchievementManager.Instance != null) {
-				AchievementManager.Instance.CompleteAchievement("1");
-			} else {
-				PlayerPrefs.SetInt("1_completed", 1);
-				PlayerPrefs.SetInt("1_claimed", 0);
-				PlayerPrefs.Save();
-			}
+			CompleteAchievementOrSaveOffline(Achievement1Id);
 		}
 
 		// Achievement 2: Hoàn thành toàn bộ Map 1 (level 4 của world 1, là last level)
 		if (GlobalValue.worldPlaying == 1 && GlobalValue.levelPlaying == 4 && LevelManager.Instance.isLastLevelOfWorld) {
 			Debug.Log("TRIGGERING Achievement 2 (World 1 completion)");
-			if (AchievementManager.Instance != null) {
-				AchievementManager.Instance.CompleteAchievement("2");
-			} else {
-				PlayerPrefs.SetInt("2_completed", 1);
-				PlayerPrefs.SetInt("2_claimed", 0);
-				PlayerPrefs.Save();
-			}
+			CompleteAchievementOrSaveOffline(Achievement2Id);
 		}
 
 		// Cập nhật leaderboard offline khi hoàn thành level, tính level toàn cục 1..8
@@ -193,9 +187,9 @@ public class GameManager: MonoBehaviour {
 			Debug.Log($"Leaderboard updated in-instance: globalLevel={globalLevel}, SavedMaxLevel={SavedMaxLevel}");
 		} else {
 			// Không có LeaderboardManager trong level scene, lưu tạm để menu lấy về
-			int pending = PlayerPrefs.GetInt("Leaderboard_Pending_You_Level", 0);
+			int pending = PlayerPrefs.GetInt(LeaderboardPendingKey, 0);
 			if (globalLevel > pending) {
-				PlayerPrefs.SetInt("Leaderboard_Pending_You_Level", globalLevel);
+				PlayerPrefs.SetInt(LeaderboardPendingKey, globalLevel);
 				PlayerPrefs.Save();
 				Debug.Log($"Leaderboard pending saved: globalLevel={globalLevel}");
 			}
@@ -215,8 +209,9 @@ public class GameManager: MonoBehaviour {
 			Debug.Log ("Unlock new level");
 		}
 
-		if (ServiceManager.Instance != null)
+		if (ServiceManager.Instance != null) {
 			ServiceManager.Instance.ShowAds ();
+		}
 	}
 
 	public void GameOver(){
@@ -243,8 +238,9 @@ public class GameManager: MonoBehaviour {
 			}
 		}
 
-		if (ServiceManager.Instance != null)
+		if (ServiceManager.Instance != null) {
 			ServiceManager.Instance.ShowAds ();
+		}
 	}
 
 	//called by MenuManager
@@ -256,7 +252,19 @@ public class GameManager: MonoBehaviour {
 
 		Instantiate (FadeInEffect);
 
-		if (ServiceManager.Instance != null)
+		if (ServiceManager.Instance != null) {
 			ServiceManager.Instance.HideAds ();
+		}
+	}
+
+	private void CompleteAchievementOrSaveOffline(string achievementId) {
+		if (AchievementManager.Instance != null) {
+			AchievementManager.Instance.CompleteAchievement(achievementId);
+			return;
+		}
+
+		PlayerPrefs.SetInt(achievementId + "_completed", 1);
+		PlayerPrefs.SetInt(achievementId + "_claimed", 0);
+		PlayerPrefs.Save();
 	}
 }
