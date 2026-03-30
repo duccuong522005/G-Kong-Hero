@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
@@ -10,30 +10,35 @@ public class Menu_Gameover : MonoBehaviour {
 	int lives;
 
 	void Awake(){
-		if (LevelManager.Instance.isLastLevelOfWorld)
+		if (LevelManager.Instance != null && LevelManager.Instance.isLastLevelOfWorld) {
 			Next.SetActive (false);		//dont show the next button when this is the final level
-
+		}
 
 
 	}
 
 	void OnEnable () {
+		if (GameManager.Instance == null) {
+			return;
+		}
 
 		Buttons.SetActive (false);
 
-		if (!GameManager.Instance.isNoLives)
+		if (!GameManager.Instance.isNoLives) {
 			lives = GameManager.Instance.SavedLives;
-		else
+		} else {
 			lives = 0;
+		}
 
 
 
 		var levelReached = PlayerPrefs.GetInt (GlobalValue.worldPlaying.ToString (), 1);
 
-		if (GlobalValue.levelPlaying < levelReached)
+		if (GlobalValue.levelPlaying < levelReached) {
 			Next.SetActive (true);
-		else
+		} else {
 			Next.SetActive (false);
+		}
 		
 		liveText.text = (lives + 1).ToString ("00");
 		StartCoroutine (SubtractLiveCo (1));
