@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class RangeAttack : MonoBehaviour {
@@ -13,13 +13,14 @@ public class RangeAttack : MonoBehaviour {
 	float nextFire = 0;
 
 	public bool Fire(){
-		if (GameManager.Instance.Bullet>0 && Time.time > nextFire) {
-			nextFire = Time.time + fireRate;
-			GameManager.Instance.Bullet--;
-			StartCoroutine (DelayAttack (fireDelay));
-			return true;
-		} else
+		if (GameManager.Instance.Bullet <= 0 || Time.time <= nextFire) {
 			return false;
+		}
+
+		nextFire = Time.time + fireRate;
+		GameManager.Instance.Bullet--;
+		StartCoroutine (DelayAttack (fireDelay));
+		return true;
 	}
 
 	IEnumerator DelayAttack(float time){
