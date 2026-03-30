@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class PathedProjectile : MonoBehaviour, ICanTakeDamage {
@@ -22,13 +22,20 @@ public class PathedProjectile : MonoBehaviour, ICanTakeDamage {
 	
 	// Update is called once per frame
 	void Update () {
+		if (_destination == null) {
+			Destroy (gameObject);
+			return;
+		}
+
 		transform.position = Vector3.MoveTowards (transform.position, _destination.position, Time.deltaTime * _speed);
 		var distance = (_destination.position - transform.position).sqrMagnitude;
-		if (distance > 0.1f * 0.1f)
+		if (distance > 0.1f * 0.1f) {
 			return;
+		}
 
-		if (DestroyEffect != null)
+		if (DestroyEffect != null) {
 			Instantiate (DestroyEffect, transform.position, Quaternion.identity);
+		}
 		
 		Destroy (gameObject);
 	}
@@ -36,17 +43,19 @@ public class PathedProjectile : MonoBehaviour, ICanTakeDamage {
 
 	void ICanTakeDamage.TakeDamage (float damage, Vector2 force, GameObject instigator)
 	{
-		if (!canBeKill)
+		if (!canBeKill) {
 			return;
+		}
 		
-		if (DestroyEffect != null)
+		if (DestroyEffect != null) {
 			Instantiate (DestroyEffect, transform.position, Quaternion.identity);
+		}
 
 		Destroy (gameObject);
 		SoundManager.PlaySfx (soundDestroy, soundDestroyVolume);
 
-		var projectile = instigator.GetComponent<Projectile> ();
-		if (projectile != null && projectile.Owner.GetComponent<Player> () != null && pointToGivePlayer != 0) {
+		var projectile = instigator != null ? instigator.GetComponent<Projectile> () : null;
+		if (projectile != null && projectile.Owner != null && projectile.Owner.GetComponent<Player> () != null && pointToGivePlayer != 0) {
 			GameManager.Instance.AddPoint (pointToGivePlayer);
 			GameManager.Instance.ShowFloatingText ("+" + pointToGivePlayer, transform.position,Color.yellow);
 		}
