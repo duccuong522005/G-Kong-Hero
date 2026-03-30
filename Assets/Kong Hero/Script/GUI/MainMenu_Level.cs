@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class MainMenu_Level : MonoBehaviour {
 	public int worldNumber = 0;
@@ -37,7 +38,40 @@ public class MainMenu_Level : MonoBehaviour {
 		GlobalValue.levelPlaying = levelNumber;
 
 		LoadingSreen.Show ();
+		int buildIndex = ResolveBuildIndex();
+		AsyncOperation operation = null;
 
-		SceneManager.LoadSceneAsync (loadscene);
+		if (buildIndex >= 0) {
+			operation = SceneManager.LoadSceneAsync(buildIndex);
+		} else if (!string.IsNullOrWhiteSpace(loadscene) && loadscene != "Level Name") {
+			operation = SceneManager.LoadSceneAsync(loadscene);
+		}
+
+		if (operation == null) {
+			Debug.LogError("Cannot load level scene. Check Build Settings and button config. world=" + worldNumber + ", level=" + levelNumber + ", loadscene=" + loadscene);
+			LoadingSreen.Hide();
+		}
+	}
+
+	int ResolveBuildIndex(){
+		// Preferred candidate based on button world / level.
+		string candidateByNumber = "World " + worldNumber + "-" + levelNumber;
+
+		for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++) {
+			string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
+			string sceneName = Path.GetFileNameWithoutExtension(scenePath);
+
+			if (!string.IsNullOrWhiteSpace(loadscene) &&
+				loadscene != "Level Name" &&
+				string.Equals(sceneName, loadscene, System.StringComparison.OrdinalIgnoreCase)) {
+				return i;
+			}
+
+			if (string.Equals(sceneName, candidateByNumber, System.StringComparison.OrdinalIgnoreCase)) {
+				return i;
+			}
+		}
+
+		return -1;
 	}
 }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class LoadingSreen : MonoBehaviour {
@@ -11,6 +11,12 @@ public class LoadingSreen : MonoBehaviour {
 	}
 	
 	public static void Show(){
-		Instance.gameObject.SetActive (true);
+		if (Instance != null)
+			Instance.gameObject.SetActive (true);
+	}
+
+	public static void Hide(){
+		if (Instance != null)
+			Instance.gameObject.SetActive (false);
 	}
 }
