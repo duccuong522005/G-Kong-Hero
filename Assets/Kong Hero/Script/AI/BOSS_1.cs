@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class BOSS_1 : MonoBehaviour, ICanTakeDamage {
@@ -70,8 +70,9 @@ public class BOSS_1 : MonoBehaviour, ICanTakeDamage {
 	
 	// Update is called once per frame
 	void Update () {
-		if (isDead || player.isFinish)
+		if (player == null || isDead || player.isFinish) {
 			return;
+		}
 		
 		if (moving) {
 			hit = Physics2D.Raycast (new Vector2 (transform.position.x, transform.position.y + 0.5f), Vector2.left, distanceDetectPlayer, playerLayer);
@@ -87,15 +88,16 @@ public class BOSS_1 : MonoBehaviour, ICanTakeDamage {
 			}
 		}
 		
-		if (Physics2D.CircleCast(centerPoint.position,attackZone,Vector2.zero,0,playerLayer) && moving) {
+		if (moving && centerPoint != null && Physics2D.CircleCast(centerPoint.position,attackZone,Vector2.zero,0,playerLayer)) {
 			StartCoroutine (Attack ());
 			StartCoroutine (IdleDelay (1, 3));
 		}
 
-		if (moving && hit)
+		if (moving && hit) {
 			anim.SetBool ("walk", true);
-		else
+		} else {
 			anim.SetBool ("walk", false);
+		}
 		
 	}
 
@@ -110,8 +112,9 @@ public class BOSS_1 : MonoBehaviour, ICanTakeDamage {
 		anim.SetTrigger ("attack");
 		yield return new WaitForSeconds (delayHit);
 		//check if player still in range and give damage
-		if (Physics2D.CircleCast(centerPoint.position,attackZone,Vector2.zero,0,playerLayer))
+		if (player != null && centerPoint != null && Physics2D.CircleCast(centerPoint.position,attackZone,Vector2.zero,0,playerLayer)) {
 			player.TakeDamage (givePlayerDamage, new Vector2 (0, 3), gameObject);
+		}
 
 	}
 
@@ -122,22 +125,18 @@ public class BOSS_1 : MonoBehaviour, ICanTakeDamage {
 		
 		anim.SetTrigger ("hit");
 		health -= damagePerHit;
-		isDead = health <= 0 ? true : false;
-		if (HealthBar != null)
+		isDead = health <= 0;
+		if (HealthBar != null) {
 			HealthBar.currentHealth = health;
+		}
 		if (isDead) {
 			SoundManager.PlaySfx (deadSound);
 			anim.SetTrigger ("die");
 			anim.SetBool ("isDead", true);
-			HealthBar.gameObject.SetActive (false);
-			var boxCo = GetComponents<BoxCollider2D> ();
-			foreach (var box in boxCo) {
-				box.enabled = false;
+			if (HealthBar != null) {
+				HealthBar.gameObject.SetActive (false);
 			}
-			var CirCo = GetComponents<CircleCollider2D> ();
-			foreach (var cir in CirCo) {
-				cir.enabled = false;
-			}
+			SetCollidersEnabled(false);
 			rig.isKinematic = true;
 
 			GameManager.Instance.GameFinish ();
@@ -145,24 +144,28 @@ public class BOSS_1 : MonoBehaviour, ICanTakeDamage {
 	}
 
 	void OnTriggerStay2D(Collider2D other){
-		var Player = other.GetComponent<Player> ();
-		if (Player == null)
+		var playerInTrigger = other.GetComponent<Player> ();
+		if (playerInTrigger == null) {
 			return;
+		}
 
-		if (!Player.isPlaying)
+		if (!playerInTrigger.isPlaying) {
 			return;
+		}
 
-		if (Time.time < nextDamage + rateDamage)
+		if (Time.time < nextDamage + rateDamage) {
 			return;
+		}
 
 		nextDamage = Time.time;
 
-		if (canBeKillOnHead && Player.transform.position.y > transform.position.y) {
+		if (canBeKillOnHead && playerInTrigger.transform.position.y > transform.position.y) {
 
-			Player.SetForce (new Vector2 (transform.localScale.x > 0 ? -pushPlayer.x : pushPlayer.x, pushPlayer.y));
+			playerInTrigger.SetForce (new Vector2 (transform.localScale.x > 0 ? -pushPlayer.x : pushPlayer.x, pushPlayer.y));
 			var canTakeDamage = (ICanTakeDamage) GetComponent (typeof(ICanTakeDamage));
-			if (canTakeDamage != null)
+			if (canTakeDamage != null) {
 				canTakeDamage.TakeDamage (damagePerHit, Vector2.zero, gameObject);
+			}
 
 			return;
 		}
@@ -174,21 +177,36 @@ public class BOSS_1 : MonoBehaviour, ICanTakeDamage {
 		//		var facingDirectionY = Mathf.Sign (Player.velocity.y);
 
 
-		var facingDirectionX = Mathf.Sign (Player.transform.position.x - transform.position.x);
-		var facingDirectionY = Mathf.Sign (Player.velocity.y);
+		var facingDirectionX = Mathf.Sign (playerInTrigger.transform.position.x - transform.position.x);
+		var facingDirectionY = Mathf.Sign (playerInTrigger.velocity.y);
 
-		Player.SetForce(new Vector2 (Mathf.Clamp (Mathf.Abs(Player.velocity.x), 10, 15) * facingDirectionX,
-			Mathf.Clamp (Mathf.Abs(Player.velocity.y), 5, 15) * facingDirectionY * -1));
+		playerInTrigger.SetForce(new Vector2 (Mathf.Clamp (Mathf.Abs(playerInTrigger.velocity.x), 10, 15) * facingDirectionX,
+			Mathf.Clamp (Mathf.Abs(playerInTrigger.velocity.y), 5, 15) * facingDirectionY * -1));
 
-		if (DamageToPlayer == 0)
+		if (DamageToPlayer == 0) {
 			return;
-		Player.TakeDamage (DamageToPlayer, Vector2.zero, gameObject);
+		}
+		playerInTrigger.TakeDamage (DamageToPlayer, Vector2.zero, gameObject);
 	}
 
 	void OnDrawGizmosSelected(){
 		Gizmos.color = Color.yellow;
 		Gizmos.DrawRay (new Vector2 (transform.position.x, transform.position.y +  0.5f), Vector2.left*distanceDetectPlayer);
 		Gizmos.DrawRay (new Vector2 (transform.position.x, transform.position.y +  0.5f), Vector2.right*distanceDetectPlayer);
-		Gizmos.DrawWireSphere (centerPoint.position, attackZone);
+		if (centerPoint != null) {
+			Gizmos.DrawWireSphere (centerPoint.position, attackZone);
+		}
+	}
+
+	private void SetCollidersEnabled(bool enabled) {
+		var boxColliders = GetComponents<BoxCollider2D> ();
+		foreach (var box in boxColliders) {
+			box.enabled = enabled;
+		}
+
+		var circleColliders = GetComponents<CircleCollider2D> ();
+		foreach (var circle in circleColliders) {
+			circle.enabled = enabled;
+		}
 	}
 }
