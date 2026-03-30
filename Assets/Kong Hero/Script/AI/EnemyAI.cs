@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 [RequireComponent (typeof (Controller2D))]
@@ -72,11 +72,13 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 	
 	// Update is called once per frame
 	public virtual void Update () {
-		if (GameManager.Instance.State == GameManager.GameState.Finish)
+		if (GameManager.Instance.State == GameManager.GameState.Finish) {
 			enabled = false;
+		}
 		
-		if (!isPlaying || isSocking)
+		if (!isPlaying || isSocking) {
 			return;
+		}
 
 		_fireIn -= Time.deltaTime;
 
@@ -93,8 +95,9 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 			var position = PointSpawn != null ? PointSpawn.position : transform.position;
 			var hit = Physics2D.Raycast (position, _direction, detectDistance, shootableLayer);
 			if (hit) {
-				if (hit.collider.gameObject.GetComponent<Player> () != null)
+				if (hit.collider.gameObject.GetComponent<Player> () != null) {
 					FireProjectile ();
+				}
 			}
 		}
 	}
@@ -107,8 +110,9 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 		velocity.y += -gravity * Time.deltaTime;
 		controller.Move (velocity * Time.deltaTime, false);
 
-		if (controller.collisions.above || controller.collisions.below)
+		if (controller.collisions.above || controller.collisions.below) {
 			velocity.y = 0;
+		}
 	}
 
 	public void SetForce(float x, float y){
@@ -116,11 +120,13 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 	}
 
 	private void FireProjectile(){
-		if (_fireIn > 0)
+		if (_fireIn > 0 || projectile == null) {
 			return;
+		}
 
 		_fireIn = fireRate;
-		var _projectile = (Projectile) Instantiate (projectile, PointSpawn.position, Quaternion.identity);
+		var spawnPosition = PointSpawn != null ? PointSpawn.position : transform.position;
+		var _projectile = (Projectile) Instantiate (projectile, spawnPosition, Quaternion.identity);
 		_projectile.Initialize (gameObject, _direction, Vector2.zero);
 	}
 
@@ -137,8 +143,9 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 		
 		pushForce = force;
 
-		if (HurtEffect != null)
+		if (HurtEffect != null) {
 			Instantiate (HurtEffect, instigator.transform.position, Quaternion.identity);
+		}
 
 		if (healthType == HealthType.HitToKill) {
 			currentHitLeft--;
@@ -152,8 +159,9 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 			}
 		}
 
-		if (instigator.GetComponent<Block> () != null)
+		if (instigator.GetComponent<Block> () != null) {
 			isDead = true;
+		}
 
 		HitEvent ();
 
@@ -162,8 +170,9 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 	protected virtual void HitEvent(){
 		
 		SoundManager.PlaySfx (hurtSound, hurtSoundVolume);
-		if (HurtEffect != null)
+		if (HurtEffect != null) {
 			Instantiate (HurtEffect, transform.position, transform.rotation);
+		}
 
 		StopAllCoroutines ();
 		StartCoroutine(PushBack (0.35f));
@@ -183,21 +192,17 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 			GameManager.Instance.ShowFloatingText ("+" + pointToGivePlayer, transform.position, Color.yellow);
 		}
 
-		if (DestroyEffect != null)
+		if (DestroyEffect != null) {
 			Instantiate (DestroyEffect, transform.position, transform.rotation);
-
-		if(spawnItemWhenDead!=null)
-			Instantiate (spawnItemWhenDead, PointSpawn.position, PointSpawn.rotation);
-
-		//turn off all colliders if the enemy have
-		var boxCo = GetComponents<BoxCollider2D> ();
-		foreach (var box in boxCo) {
-			box.enabled = false;
 		}
-		var CirCo = GetComponents<CircleCollider2D> ();
-		foreach (var cir in CirCo) {
-			cir.enabled = false;
+
+		if (spawnItemWhenDead != null) {
+			var spawnPosition = PointSpawn != null ? PointSpawn.position : transform.position;
+			var spawnRotation = PointSpawn != null ? PointSpawn.rotation : transform.rotation;
+			Instantiate (spawnItemWhenDead, spawnPosition, spawnRotation);
 		}
+
+		SetCollidersEnabled(false);
 
 	}
 
@@ -219,15 +224,7 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 		isSocking = false;
 		gameObject.SetActive (true);
 
-		//turn on all colliders if the enemy have
-		var boxCo = GetComponents<BoxCollider2D> ();
-		foreach (var box in boxCo) {
-			box.enabled = true;
-		}
-		var CirCo = GetComponents<CircleCollider2D> ();
-		foreach (var cir in CirCo) {
-			cir.enabled = true;
-		}
+		SetCollidersEnabled(true);
 
 
 		OnRespawn ();
@@ -241,19 +238,34 @@ public class EnemyAI : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 		yield return new WaitForSeconds (delay);
 		SetForce (0, 0);
 
-		if (isDead)
+		if (isDead) {
 			Dead ();
-		else
+		} else {
 			isPlaying = true;
+		}
 	}
 
 	public void OnDrawGizmosSelected(){
 		if (isUseProjectile) {
 			Gizmos.color = Color.blue;
-			if (_direction.magnitude != 0)
-				Gizmos.DrawRay (PointSpawn.position, _direction * detectDistance);
-			else
-				Gizmos.DrawRay (PointSpawn.position, Vector2.left * detectDistance);
+			var point = PointSpawn != null ? PointSpawn.position : transform.position;
+			if (_direction.magnitude != 0) {
+				Gizmos.DrawRay (point, _direction * detectDistance);
+			} else {
+				Gizmos.DrawRay (point, Vector2.left * detectDistance);
+			}
+		}
+	}
+
+	private void SetCollidersEnabled(bool enabled) {
+		var boxColliders = GetComponents<BoxCollider2D> ();
+		foreach (var box in boxColliders) {
+			box.enabled = enabled;
+		}
+
+		var circleColliders = GetComponents<CircleCollider2D> ();
+		foreach (var circle in circleColliders) {
+			circle.enabled = enabled;
 		}
 	}
 }
