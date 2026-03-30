@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class GiveDamageToPlayer : MonoBehaviour {
@@ -19,24 +19,28 @@ public class GiveDamageToPlayer : MonoBehaviour {
 	public float damageOnHead;
 
 	void OnTriggerStay2D(Collider2D other){
-		var Player = other.GetComponent<Player> ();
-		if (Player == null)
+		var player = other.GetComponent<Player> ();
+		if (player == null) {
 			return;
+		}
 
-		if (!Player.isPlaying)
+		if (!player.isPlaying) {
 			return;
+		}
 
-		if (Time.time < nextDamage + rateDamage)
+		if (Time.time < nextDamage + rateDamage) {
 			return;
+		}
 
 		nextDamage = Time.time;
 
-		if (canBeKillOnHead && Player.transform.position.y > transform.position.y) {
+		if (canBeKillOnHead && player.transform.position.y > transform.position.y) {
 
-			Player.SetForce(pushPlayer);
+			player.SetForce(pushPlayer);
 			var canTakeDamage = (ICanTakeDamage) GetComponent (typeof(ICanTakeDamage));
-			if (canTakeDamage != null)
+			if (canTakeDamage != null) {
 				canTakeDamage.TakeDamage (damageOnHead, Vector2.zero, gameObject);
+			}
 			
 			return;
 		}
@@ -46,20 +50,22 @@ public class GiveDamageToPlayer : MonoBehaviour {
 		//Push player back
 //		var facingDirectionX = Mathf.Sign (Player.transform.localScale.x);
 //		var facingDirectionY = Mathf.Sign (Player.velocity.y);
-		if (DamageToPlayer == 0)
+		if (DamageToPlayer == 0) {
 			return;
+		}
 
-		var facingDirectionX = Mathf.Sign (Player.transform.position.x - transform.position.x);
-		var facingDirectionY = Mathf.Sign (Player.velocity.y);
+		var facingDirectionX = Mathf.Sign (player.transform.position.x - transform.position.x);
+		var facingDirectionY = Mathf.Sign (player.velocity.y);
 
-		Player.SetForce(new Vector2 (Mathf.Clamp (Mathf.Abs(Player.velocity.x), 10, 15) * facingDirectionX,
-			Mathf.Clamp (Mathf.Abs(Player.velocity.y), 5, 15) * facingDirectionY * -1));
+		player.SetForce(new Vector2 (Mathf.Clamp (Mathf.Abs(player.velocity.x), 10, 15) * facingDirectionX,
+			Mathf.Clamp (Mathf.Abs(player.velocity.y), 5, 15) * facingDirectionY * -1));
 
-		Player.TakeDamage (DamageToPlayer, Vector2.zero, gameObject);
+		player.TakeDamage (DamageToPlayer, Vector2.zero, gameObject);
 
 		if (isDestroyWhenHitPlayer) {
-			if (DestroyFx != null)
+			if (DestroyFx != null) {
 				Instantiate (DestroyFx, transform.position, Quaternion.identity);
+			}
 
 			Destroy (gameObject);
 		}
