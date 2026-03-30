@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class BOSS_2 : MonoBehaviour,ICanTakeDamage {
@@ -44,12 +44,17 @@ public class BOSS_2 : MonoBehaviour,ICanTakeDamage {
 		anim.SetTrigger ("Attack");
 		yield return new WaitForSeconds (delay);
 
-		if (GameManager.Instance.State == GameManager.GameState.Playing)
+		if (GameManager.Instance != null && GameManager.Instance.State == GameManager.GameState.Playing) {
 			StartCoroutine (Attack (Random.Range (MinAttackTime, MaxAttackTime)));
+		}
 	}
 
 	//Called by animation event trigger
 	public void ThrowStone(){
+		if (Stone == null || attackPoint == null) {
+			return;
+		}
+
 		Instantiate (Stone, attackPoint.position, Quaternion.identity);
 	}
 
@@ -60,24 +65,32 @@ public class BOSS_2 : MonoBehaviour,ICanTakeDamage {
 
 		health -= damagePerHit;
 		
-		isDead = health <= 0 ? true : false;
-		if (HealthBar != null)
+		isDead = health <= 0;
+		if (HealthBar != null) {
 			HealthBar.currentHealth = health;
+		}
 		if (isDead) {
 			SoundManager.PlaySfx (deadSound);
 			anim.SetTrigger ("Dead");
-			HealthBar.gameObject.SetActive (false);
-			var boxCo = GetComponents<BoxCollider2D> ();
-			foreach (var box in boxCo) {
-				box.enabled = false;
+			if (HealthBar != null) {
+				HealthBar.gameObject.SetActive (false);
 			}
-			var CirCo = GetComponents<CircleCollider2D> ();
-			foreach (var cir in CirCo) {
-				cir.enabled = false;
-			}
+			SetCollidersEnabled(false);
 			rig.isKinematic = true;
 
 			GameManager.Instance.GameFinish ();
+		}
+	}
+
+	private void SetCollidersEnabled(bool enabled) {
+		var boxColliders = GetComponents<BoxCollider2D> ();
+		foreach (var box in boxColliders) {
+			box.enabled = enabled;
+		}
+
+		var circleColliders = GetComponents<CircleCollider2D> ();
+		foreach (var circle in circleColliders) {
+			circle.enabled = enabled;
 		}
 	}
 }
