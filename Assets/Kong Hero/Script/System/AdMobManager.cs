@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using GoogleMobileAds.Api;
 using System;
@@ -27,9 +26,7 @@ public class AdMobManager : MonoBehaviour
 
     void Start()
     {
-        // Defer ad SDK work so the first frames can process UI/touch. On emulators
-        // (e.g. LDPlayer) or slow Play Services, initializing/loading ads on frame 1
-        // can stall the main thread long enough to trigger ANR ("app isn't responding").
+        // Defer init so early frames stay responsive (reduces ANR risk on emulators / slow Play Services).
         StartCoroutine(InitAdsWhenIdle());
     }
 
@@ -59,8 +56,6 @@ public class AdMobManager : MonoBehaviour
             rewardedAd = null;
         }
 
-        Debug.Log("Loading the rewarded ad.");
-
         var adRequest = new AdRequest();
 
         RewardedAd.Load(adUnitId, adRequest,
@@ -87,16 +82,11 @@ public class AdMobManager : MonoBehaviour
         const string rewardMsg =
             "Rewarded ad rewarded the user. Type: {0}, amount: {1}.";
 
-        Debug.Log($"ShowRewardedAd() called. rewardedAd is null: {rewardedAd == null}");
-        
         if (rewardedAd != null)
         {
             bool canShow = rewardedAd.CanShowAd();
-            Debug.Log($"rewardedAd.CanShowAd() = {canShow}");
-            
             if (canShow)
             {
-                Debug.Log("Showing rewarded ad now...");
                 rewardedAd.Show((Reward reward) =>
                 {
                     Debug.Log(String.Format(rewardMsg, reward.Type, reward.Amount));
