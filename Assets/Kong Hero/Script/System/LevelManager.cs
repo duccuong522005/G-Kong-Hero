@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,12 +71,14 @@ public class LevelManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (_currentCheckpointIndex + 1 >= _checkpoints.Count)
+		if (Player == null || _currentCheckpointIndex + 1 >= _checkpoints.Count) {
 			return;
+		}
 
 		var distanceToNextCheckPoint = _checkpoints [_currentCheckpointIndex + 1].transform.position.x - Player.transform.position.x;
-		if (distanceToNextCheckPoint >= 0)
+		if (distanceToNextCheckPoint >= 0) {
 			return;
+		}
 
 		_currentCheckpointIndex++;
 		_checkpoints [_currentCheckpointIndex].PlayerLeftCheckPoint ();
@@ -98,8 +100,9 @@ public class LevelManager : MonoBehaviour {
 //			_checkpoints[_currentCheckpointIndex].SpawnPlayer(Player);
 //		}
 //		#else
-		if(_currentCheckpointIndex!=-1)
-		_checkpoints[_currentCheckpointIndex].SpawnPlayer(Player);
+		if (_currentCheckpointIndex != -1) {
+			_checkpoints[_currentCheckpointIndex].SpawnPlayer(Player);
+		}
 //		#endif 
 
 
@@ -117,6 +120,10 @@ public class LevelManager : MonoBehaviour {
 	}
 
 	public void GotoCheckPoint(){
+		if (_currentCheckpointIndex < 0 || _currentCheckpointIndex >= _checkpoints.Count) {
+			return;
+		}
+
 		_checkpoints [_currentCheckpointIndex].SpawnPlayer (Player);
 		Camera.isFollowing = true;
 		currentTimer = saveTimerCheckPoint;
