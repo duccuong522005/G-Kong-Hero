@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -13,9 +13,11 @@ public class MainMenu_Level : MonoBehaviour {
 
 	public Text TextLevel;
 	public GameObject Locked;
+	private Button levelButton;
 
 	// Use this for initialization
 	void Start () {
+		levelButton = GetComponent<Button> ();
 		var levelReached = PlayerPrefs.GetInt (worldNumber.ToString (), 1);
 		if (levelNumber <= levelReached && worldNumber <= PlayerPrefs.GetInt (GlobalValue.WorldReached, 1)) {
 			TextLevel.gameObject.SetActive (true);
@@ -24,7 +26,9 @@ public class MainMenu_Level : MonoBehaviour {
 		} else {
 			TextLevel.gameObject.SetActive (false);
 			Locked.SetActive (true);
-			GetComponent<Button> ().interactable = false;
+			if (levelButton != null) {
+				levelButton.interactable = false;
+			}
 		}
 	}
 
