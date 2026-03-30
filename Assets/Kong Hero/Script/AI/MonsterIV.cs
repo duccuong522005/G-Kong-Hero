@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class MonsterIV : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
@@ -19,6 +19,10 @@ public class MonsterIV : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 		rig = GetComponent<Rigidbody2D> ();
 	}
 	void Update(){
+		if (line == null || linePoint == null) {
+			return;
+		}
+
 		line.SetPosition (0, linePoint.position);
 		line.SetPosition (1, transform.position);
 	}
@@ -27,21 +31,18 @@ public class MonsterIV : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 		SoundManager.PlaySfx(soundDead);
 		GameManager.Instance.AddPoint(scoreRewarded);
 
-		if (deadFx != null)
-		Instantiate (deadFx, transform.position, Quaternion.identity);
-
-		//turn off all colliders if the enemy have
-		var boxCo = GetComponents<BoxCollider2D> ();
-		foreach (var box in boxCo) {
-			box.enabled = false;
-		}
-		var CirCo = GetComponents<CircleCollider2D> ();
-		foreach (var cir in CirCo) {
-			cir.enabled = false;
+		if (deadFx != null) {
+			Instantiate (deadFx, transform.position, Quaternion.identity);
 		}
 
-		springJoint.enabled = false;
-		line.enabled = false;
+		SetCollidersEnabled(false);
+
+		if (springJoint != null) {
+			springJoint.enabled = false;
+		}
+		if (line != null) {
+			line.enabled = false;
+		}
 		rig.linearVelocity = Vector2.zero;
 		rig.AddForce (new Vector2 (0, 300f));
 	}
@@ -73,18 +74,26 @@ public class MonsterIV : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
 		transform.rotation = Quaternion.Euler (0, 0, 0);
 		gameObject.SetActive (true);
 
-		//turn on all colliders if the enemy have
-		var boxCo = GetComponents<BoxCollider2D> ();
-		foreach (var box in boxCo) {
-			box.enabled = true;
-		}
-		var CirCo = GetComponents<CircleCollider2D> ();
-		foreach (var cir in CirCo) {
-			cir.enabled = true;
-		}
+		SetCollidersEnabled(true);
 
 		rig.isKinematic = true;
-		springJoint.enabled = true;
-		line.enabled = true;
+		if (springJoint != null) {
+			springJoint.enabled = true;
+		}
+		if (line != null) {
+			line.enabled = true;
+		}
+	}
+
+	private void SetCollidersEnabled(bool enabled) {
+		var boxColliders = GetComponents<BoxCollider2D> ();
+		foreach (var box in boxColliders) {
+			box.enabled = enabled;
+		}
+
+		var circleColliders = GetComponents<CircleCollider2D> ();
+		foreach (var circle in circleColliders) {
+			circle.enabled = enabled;
+		}
 	}
 }
