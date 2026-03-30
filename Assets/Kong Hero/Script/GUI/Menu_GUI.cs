@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
@@ -12,6 +12,10 @@ public class Menu_GUI : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (GameManager.Instance == null || LevelManager.Instance == null) {
+			return;
+		}
+
 		scoreText.text = GameManager.Instance.Point.ToString ("0000000");
 		coinText.text = GameManager.Instance.Coin.ToString ("00");
 		timerText.text = LevelManager.Instance.currentTimer.ToString ("000");
