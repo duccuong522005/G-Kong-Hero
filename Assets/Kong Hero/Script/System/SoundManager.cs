@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 /*
  * This is SoundManager
@@ -50,18 +50,34 @@ public class SoundManager : MonoBehaviour {
 	}
 
 	public static void PlaySfx(AudioClip clip){
+		if (Instance == null) {
+			return;
+		}
+
 		Instance.PlaySound(clip, Instance.soundFx);
 	}
 
 	public static void PlaySfx(AudioClip clip, float volume){
+		if (Instance == null) {
+			return;
+		}
+
 		Instance.PlaySound(clip, Instance.soundFx, volume);
 	}
 
 	public static void PlayMusic(AudioClip clip){
+		if (Instance == null) {
+			return;
+		}
+
 		Instance.PlaySound (clip, Instance.musicAudio);
 	}
 
 	public static void PlayMusic(AudioClip clip, float volume){
+		if (Instance == null) {
+			return;
+		}
+
 		Instance.PlaySound (clip, Instance.musicAudio, volume);
 	}
 
@@ -74,8 +90,9 @@ public class SoundManager : MonoBehaviour {
 		if (audioOut == musicAudio) {
 			audioOut.clip = clip;
 			audioOut.Play ();
-		} else
+		} else {
 			audioOut.PlayOneShot (clip, SoundVolume);
+		}
 	}
 
 	private void PlaySound(AudioClip clip,AudioSource audioOut, float volume){
@@ -87,7 +104,8 @@ public class SoundManager : MonoBehaviour {
 		if (audioOut == musicAudio) {
 			audioOut.clip = clip;
 			audioOut.Play ();
-		} else
+		} else {
 			audioOut.PlayOneShot (clip, SoundVolume * volume);
+		}
 	}
 }
