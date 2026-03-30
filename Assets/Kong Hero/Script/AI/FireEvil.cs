@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class FireEvil : MonoBehaviour, IPlayerRespawnListener {
@@ -25,6 +25,7 @@ public class FireEvil : MonoBehaviour, IPlayerRespawnListener {
 	public void OnPlayerRespawnInThisCheckPoint (CheckPoint checkpoint, Player player)
 	{
 		transform.position = old_position;
+		_direction = transform.localScale.x > 0 ? -1 : 1;
 		gameObject.SetActive (true);
 	}
 	#endregion
