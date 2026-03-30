@@ -27,7 +27,26 @@ public class AdMobManager : MonoBehaviour
 
     void Start()
     {
-        MobileAds.Initialize(initStatus => { });
+        // Defer ad SDK work so the first frames can process UI/touch. On emulators
+        // (e.g. LDPlayer) or slow Play Services, initializing/loading ads on frame 1
+        // can stall the main thread long enough to trigger ANR ("app isn't responding").
+        StartCoroutine(InitAdsWhenIdle());
+    }
+
+    IEnumerator InitAdsWhenIdle()
+    {
+        yield return null;
+        yield return null;
+
+        bool initDone = false;
+        MobileAds.Initialize(_ => { initDone = true; });
+
+        float waited = 0f;
+        while (!initDone && waited < 8f)
+        {
+            waited += Time.unscaledDeltaTime;
+            yield return null;
+        }
 
         LoadRewardedAd();
     }
