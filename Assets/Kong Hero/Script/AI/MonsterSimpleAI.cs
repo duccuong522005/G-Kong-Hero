@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class MonsterSimpleAI : EnemyAI {
@@ -10,11 +10,13 @@ public class MonsterSimpleAI : EnemyAI {
 	protected override void HitEvent ()
 	{
 		base.HitEvent ();
-		if (isDead)
+		if (isDead) {
 			Dead ();
+		}
 
-		if (animator != null && hitEventName.CompareTo ("n/a") != 0)
+		if (animator != null && hitEventName.CompareTo ("n/a") != 0) {
 			animator.SetTrigger (hitEventName);
+		}
 	}
 
 	public override void Update ()
@@ -26,8 +28,9 @@ public class MonsterSimpleAI : EnemyAI {
 	protected override void Dead ()
 	{
 		base.Dead ();
-		if (animator != null && deadEventName.CompareTo ("n/a") != 0)
+		if (animator != null && deadEventName.CompareTo ("n/a") != 0) {
 			animator.SetTrigger (deadEventName);
+		}
 		
 		SetForce (0, 5);
 		controller.HandlePhysic = false;
