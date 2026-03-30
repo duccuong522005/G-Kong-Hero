@@ -94,12 +94,9 @@ public class Player : MonoBehaviour, ICanTakeDamage {
 	}
 
 	void Start() {
-		
-
 		gravity = -(2 * maxJumpHeight) / Mathf.Pow (timeToJumpApex, 2);
 		maxJumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
 		minJumpVelocity = Mathf.Sqrt (2 * Mathf.Abs (gravity) * minJumpHeight);
-//		print ("Gravity: " + gravity + "  Jump Velocity: " + maxJumpVelocity);
 
 		isFacingRight = transform.localScale.x > 0;
 		Health = maxHealth;
@@ -118,8 +115,6 @@ public class Player : MonoBehaviour, ICanTakeDamage {
 	}
 
 	void Update() {
-//		Debug.Log (GameManager.Instance.State);
-//		Vector2 input = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical"));
 		HandleInput();
 		HandleAnimation ();
 
@@ -174,54 +169,38 @@ public class Player : MonoBehaviour, ICanTakeDamage {
 		}
 	}
 
-
-	/// <summary>
-	/// Controller	/// </summary>
-	/// <param name="pos">Position.</param>
-
 	private void HandleInput(){
-		if (MenuManager.Instance != null && Input.GetKeyDown(KeyCode.Escape)) {
+		if (MenuManager.Instance != null && Input.GetKeyDown(KeyCode.Escape))
 			MenuManager.Instance.Pause();
-		}
 
-		// Horizontal: WASD (A/D) và mũi tên trái/phải dùng cùng lúc; nếu giữ cả hai hướng thì dừng ngang.
 		bool leftHeld = Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow);
 		bool rightHeld = Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow);
-		if (leftHeld && rightHeld) {
+		if (leftHeld && rightHeld)
 			StopMove();
-		} else if (leftHeld) {
+		else if (leftHeld)
 			MoveLeft();
-		} else if (rightHeld) {
+		else if (rightHeld)
 			MoveRight();
-		} else if (Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow)
-		           || Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow)) {
+		else if (Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.LeftArrow)
+		         || Input.GetKeyUp(KeyCode.D) || Input.GetKeyUp(KeyCode.RightArrow))
 			StopMove();
-		}
 
-		// Xuống / rơi qua nền: S hoặc mũi tên xuống
 		if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
 			FallDown();
 		else if (Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.DownArrow))
 			StopMove();
 
-		// Nhảy: Space, mũi tên lên, hoặc W
-		if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) {
+		if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
 			Jump();
-		}
 
-		if (Input.GetKeyUp(KeyCode.Space) || Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.W)) {
+		if (Input.GetKeyUp(KeyCode.Space) || Input.GetKeyUp(KeyCode.UpArrow) || Input.GetKeyUp(KeyCode.W))
 			JumpOff();
-		}
 
-		// Đánh gần: mỗi phím riêng — G hoặc phím 1 numpad
-		if (Input.GetKeyDown(KeyCode.G) || Input.GetKeyDown(KeyCode.Keypad1)) {
+		if (Input.GetKeyDown(KeyCode.G) || Input.GetKeyDown(KeyCode.Keypad1))
 			MeleeAttack();
-		}
 
-		// Đánh xa: mỗi phím riêng — H hoặc phím 2 numpad
-		if (Input.GetKeyDown(KeyCode.H) || Input.GetKeyDown(KeyCode.Keypad2)) {
+		if (Input.GetKeyDown(KeyCode.H) || Input.GetKeyDown(KeyCode.Keypad2))
 			RangeAttack();
-		}
 	}
 
 
