@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class MonsterFish : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener {
@@ -38,20 +38,13 @@ public class MonsterFish : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener
 	public void Dead(){
 		SoundManager.PlaySfx(soundDead);
 		GameManager.Instance.AddPoint(scoreRewarded);
-		if (deadFx != null)
+		if (deadFx != null) {
 			Instantiate (deadFx, transform.position, Quaternion.identity);
+		}
 
 		rig.linearVelocity = Vector2.zero;
 
-		//turn off all colliders if the enemy have
-		var boxCo = GetComponents<BoxCollider2D> ();
-		foreach (var box in boxCo) {
-			box.enabled = false;
-		}
-		var CirCo = GetComponents<CircleCollider2D> ();
-		foreach (var cir in CirCo) {
-			cir.enabled = false;
-		}
+		SetCollidersEnabled(false);
 	}
 
 //	void OnTriggerEnter2D(Collider2D other){
@@ -86,20 +79,24 @@ public class MonsterFish : MonoBehaviour, ICanTakeDamage, IPlayerRespawnListener
 		transform.rotation = Quaternion.Euler (0, 0, 0);
 		gameObject.SetActive (true);
 
-		//turn on all colliders if the enemy have
-		var boxCo = GetComponents<BoxCollider2D> ();
-		foreach (var box in boxCo) {
-			box.enabled = true;
-		}
-		var CirCo = GetComponents<CircleCollider2D> ();
-		foreach (var cir in CirCo) {
-			cir.enabled = true;
-		}
+		SetCollidersEnabled(true);
 	}
 
 	void OnDrawGizmosSelected(){
 		Gizmos.color = Color.yellow;
 		Gizmos.DrawRay (transform.position, Attackdirection);
+	}
+
+	private void SetCollidersEnabled(bool enabled) {
+		var boxColliders = GetComponents<BoxCollider2D> ();
+		foreach (var box in boxColliders) {
+			box.enabled = enabled;
+		}
+
+		var circleColliders = GetComponents<CircleCollider2D> ();
+		foreach (var circle in circleColliders) {
+			circle.enabled = enabled;
+		}
 	}
 
 }
