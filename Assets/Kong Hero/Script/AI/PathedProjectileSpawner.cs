@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class PathedProjectileSpawner : MonoBehaviour {
@@ -22,19 +22,26 @@ public class PathedProjectileSpawner : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (GameManager.Instance.State != GameManager.GameState.Playing)
+		if (GameManager.Instance == null || GameManager.Instance.State != GameManager.GameState.Playing) {
 			return;
+		}
 		
-		if (Time.time < nextFireRate + fireRate)
+		if (Time.time < nextFireRate + fireRate) {
 			return;
+		}
 
 		nextFireRate = Time.time;
+
+		if (Projectile == null || Destination == null) {
+			return;
+		}
 
 		var projectile = (PathedProjectile) Instantiate (Projectile, transform.position, Quaternion.identity);
 		projectile.Initalize (Destination, speed);
 
-		if (SpawnEffect != null)
+		if (SpawnEffect != null) {
 			Instantiate (SpawnEffect, transform.position, Quaternion.identity);
+		}
 
 		SoundManager.PlaySfx (spawnSound, spawnSoundVolume);
 	}
