@@ -1,4 +1,4 @@
-﻿using UnityEngine;	
+using UnityEngine;	
 using System.Collections;	
 	
 public class BOSS_3 : MonoBehaviour,ICanTakeDamage {	
@@ -50,7 +50,7 @@ public class BOSS_3 : MonoBehaviour,ICanTakeDamage {
 	// Use this for initialization	
 	void Start () {		
 		player = FindObjectOfType<Player> ();
-		currentPatrolPoint = PointBackUps [Random.Range (0, PointBackUps.Length)];
+		currentPatrolPoint = GetRandomBackupPoint();
 
 		rig = GetComponent<Rigidbody2D> ();
 		anim = GetComponent<Animator> ();
@@ -68,7 +68,7 @@ public class BOSS_3 : MonoBehaviour,ICanTakeDamage {
 		
 	// Update is called once per frame	
 	void Update () {	
-		if (isDead)
+		if (isDead || player == null)
 			return;
 		
 		if (attack) {
@@ -78,14 +78,14 @@ public class BOSS_3 : MonoBehaviour,ICanTakeDamage {
 			}
 		} else if (backup) {
 			transform.position = Vector2.MoveTowards (transform.position, pointBackUp.position, speedFly * Time.deltaTime * 2);
-			if (Vector2.Distance (transform.position, pointBackUp.position) < 0.1f) {
+			if (pointBackUp != null && Vector2.Distance (transform.position, pointBackUp.position) < 0.1f) {
 				backup = false;
 				StartCoroutine (AttackCo ());
 			}
 		} else {
 			transform.position = Vector2.MoveTowards (transform.position, currentPatrolPoint.position, speedFly * Time.deltaTime/2);
 			if (Vector2.Distance (transform.position, currentPatrolPoint.position) < 0.1f) {
-				currentPatrolPoint = PointBackUps [Random.Range (0, PointBackUps.Length)];
+				currentPatrolPoint = GetRandomBackupPoint();
 			}
 		}
 
@@ -102,7 +102,7 @@ public class BOSS_3 : MonoBehaviour,ICanTakeDamage {
 	void BackUp(){
 		attack = false;
 		backup = true;
-		pointBackUp = PointBackUps [Random.Range (0, PointBackUps.Length)];
+		pointBackUp = GetRandomBackupPoint();
 	}
 
 	IEnumerator AttackCo(){
@@ -123,21 +123,17 @@ public class BOSS_3 : MonoBehaviour,ICanTakeDamage {
 //		if (health < 50)
 //			randomMax = coolDownState2;
 
-		isDead = health <= 0 ? true : false;
-		if (HealthBar != null)
+		isDead = health <= 0;
+		if (HealthBar != null) {
 			HealthBar.currentHealth = health;
+		}
 		if (isDead) {
 			SoundManager.PlaySfx (deadSound);
 			anim.SetTrigger ("Dead");
-			HealthBar.gameObject.SetActive (false);
-			var boxCo = GetComponents<BoxCollider2D> ();
-			foreach (var box in boxCo) {
-				box.enabled = false;
+			if (HealthBar != null) {
+				HealthBar.gameObject.SetActive (false);
 			}
-			var CirCo = GetComponents<CircleCollider2D> ();
-			foreach (var cir in CirCo) {
-				cir.enabled = false;
-			}
+			SetCollidersEnabled(false);
 			rig.isKinematic = false;
 			rig.AddForce (new Vector2 (0, 200));
 
@@ -148,11 +144,11 @@ public class BOSS_3 : MonoBehaviour,ICanTakeDamage {
 	}
 
 	void OnTriggerStay2D(Collider2D other){
-		var Player = other.GetComponent<Player> ();
-		if (Player == null)
+		var playerInTrigger = other.GetComponent<Player> ();
+		if (playerInTrigger == null)
 			return;
 
-		if (!Player.isPlaying)
+		if (!playerInTrigger.isPlaying)
 			return;
 
 		if (Time.time < nextDamage + rateDamage)
@@ -160,9 +156,9 @@ public class BOSS_3 : MonoBehaviour,ICanTakeDamage {
 
 		nextDamage = Time.time;
 
-		if (canBeKillOnHead && Player.transform.position.y > transform.position.y) {
+		if (canBeKillOnHead && playerInTrigger.transform.position.y > transform.position.y) {
 
-			Player.SetForce (new Vector2 (transform.localScale.x > 0 ? -pushPlayer.x : pushPlayer.x, pushPlayer.y));
+			playerInTrigger.SetForce (new Vector2 (transform.localScale.x > 0 ? -pushPlayer.x : pushPlayer.x, pushPlayer.y));
 			var canTakeDamage = (ICanTakeDamage) GetComponent (typeof(ICanTakeDamage));
 			if (canTakeDamage != null)
 				canTakeDamage.TakeDamage (damagePerHit, Vector2.zero, gameObject);
@@ -177,16 +173,36 @@ public class BOSS_3 : MonoBehaviour,ICanTakeDamage {
 		//		var facingDirectionY = Mathf.Sign (Player.velocity.y);
 
 
-		var facingDirectionX = Mathf.Sign (Player.transform.position.x - transform.position.x);
-		var facingDirectionY = Mathf.Sign (Player.velocity.y);
+		var facingDirectionX = Mathf.Sign (playerInTrigger.transform.position.x - transform.position.x);
+		var facingDirectionY = Mathf.Sign (playerInTrigger.velocity.y);
 
-		Player.SetForce(new Vector2 (Mathf.Clamp (Mathf.Abs(Player.velocity.x), 10, 15) * facingDirectionX,
-			Mathf.Clamp (Mathf.Abs(Player.velocity.y), 5, 15) * facingDirectionY * -1));
+		playerInTrigger.SetForce(new Vector2 (Mathf.Clamp (Mathf.Abs(playerInTrigger.velocity.x), 10, 15) * facingDirectionX,
+			Mathf.Clamp (Mathf.Abs(playerInTrigger.velocity.y), 5, 15) * facingDirectionY * -1));
 
 		if (DamageToPlayer == 0)
 			return;
-		Player.TakeDamage (DamageToPlayer, Vector2.zero, gameObject);
+		playerInTrigger.TakeDamage (DamageToPlayer, Vector2.zero, gameObject);
 
 
+	}
+
+	private Transform GetRandomBackupPoint() {
+		if (PointBackUps == null || PointBackUps.Length == 0) {
+			return transform;
+		}
+
+		return PointBackUps [Random.Range (0, PointBackUps.Length)];
+	}
+
+	private void SetCollidersEnabled(bool enabled) {
+		var boxColliders = GetComponents<BoxCollider2D> ();
+		foreach (var box in boxColliders) {
+			box.enabled = enabled;
+		}
+
+		var circleColliders = GetComponents<CircleCollider2D> ();
+		foreach (var circle in circleColliders) {
+			circle.enabled = enabled;
+		}
 	}
 }	
